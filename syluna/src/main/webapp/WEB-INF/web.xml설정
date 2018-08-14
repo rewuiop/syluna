@@ -1,0 +1,177 @@
+- web.xml설정
+- DispatcherServlet 설정
+	spring에서는 Dispatcher 서블릿이 모든 클라이언트의 요청을 전달받는 서블릿이며,
+	요청의 URL과 맵핑하는 Controller에게 위임된다.
+	(서블릿은 보통 자바에서 동적 웹 프로젝트를 개발할 때, 사용자의 요청과 응답을 처리해 주는 역할을 한다.)
+	컨트롤러나 뷰와 같은 스프링 MVC의 구성 요소를 이용해 클라이언트에게 서비스를 제공한다.
+	web.xml은 WEB-INF폴더 아래 위치한다.(원래 위치는 WEB-INF/web.xml)
+	서블릿과 매핑정보를 추가하면 Dispatcher 설정이 완료된다.
+	완성된 Dispatcher 서블릿은 서블릿이름-servlet.xml(기본)으로 가 스프링 기본 설정을 읽어오게 된다.
+	
+	ex)
+		<servlet>
+			<servlet-name>action</servlet-name> ---> 서블릿 이름을 지정. 
+													이 서블릿 이름에 -servlet.xml이라는 문자열을 부가해 
+													컨테이너 상에 로드된 스프링 설정 파일명이 결정된다.
+			<servlet-class>
+				org.springframework.web.servlet.DispatcherServlet -> 이 서블릿이 Dispatcher 서블릿임을 명시.
+			</servlet-class>
+			<init-param>
+				<param-name>contextConfigLocation</param-name> ---> Dispatcher 서블릿이 위치할 경로를 명시한다.
+																	주로 여러개의 설정파일을 읽거나, -servlet.xml외의 다른 파일을 읽을 때 사용한다.
+				<param-value>
+					/WEB-INF/config/*-servlet.xml ---> 스프링 설정파일. 위에서 말한 경로와 이름매핑을 시켜줌.
+													   classpath:/config/action-servlet.xml과 같이 쓸 수 있다.
+													   설정파일의 경로는 웹어플리케이션 루트 디렉토리를 기준으로 한다.
+													   설정하지 않으면 /WEB-INF/[servlet-name]-servlet.xml 파일로부터 설정정보를 읽어온다.
+				</param-value>
+			</init-param>
+			<load-on-startup>1</load-on-startup> ---> 서버 시작시 로드되도록 1로 설정한 것이다.
+		</servlet>
+		<servlet-mapping>
+			<servlet-name>action</servlet-name>
+			<url-pattern>*.do</url-pattern> ---> context root 아래 .do로 요청을 하면 DispatcherServlet 클래스로 랩핑된다.
+												 여기서의 DispatcherServlet 클래스는 /WEB-INF/config/action-servlet.xml 
+		</servlet-mapping>
+		
+- org.springframework.web.servlet.DispatcherServlet에 대해
+	보통 WEB 어플리케이션에서는 Servlet을 만들지만, 
+	Spring Web MVC에서는 스프링이 제공해주기 때문에 따로 생성하지 않고 이것을 사용한다.
+	이것이 클라이언트의 요청을 받아 컨트롤러 클래스(@Controller)에 할당해 컨트롤러 클래스에서
+	반환으로 뷰(jsp)를 할당하고 클라이언트에 돌려준다. spring mvc의 전체 제어를 수행하고, web.xml에 설저오딘다.
+
+- context-param 설정
+	<context-param> : STS에서 기본제공해주는 설정 파일 외에 사용자가 직접 컨트롤하는 XML 파일을 지정하는 역할이다.
+	계층별로 나눈 xml 설정파일들이 있을 때, web.xml에서 해당 xml 설정 파일들을 모두 load 되도록 등록하려고 할 때 사용할 수 있다.
+	아래에서 param-value에 있는 classpath*:config/spring/context-*.xml은
+	모든 서블릿과 필터에서 사용되는 루트 스프링 컨테이너에 대한 설정이다.
+	<listener> : 스프링 설정 정보를 읽는 역할을 한다.
+	위에서는 <servlet>을 하나만 쓴 경우. 두개를 등록해도 된다.
+	하지만 그렇게 되면 각각의 xml 파일에서는 한쪽에서 선언된 Bean을 다른쪽에서 사용할 수 없다.
+	== 별도의 webapplicationcontext를 생성해서 두 context는 독립적이므로 각각의 설정파일에서 생성한 빈을 공유할 수 없다.
+	그래서 공통적으로 사용되는 Bean을 등록해 주는 것이 context-param이다.
+	ContextConfigListener를 Servlet Listener로 등록하여 공통으로 사용되는 설정파일의 목록을 지정해 준다.
+	ex)
+		<context-param>
+	        <param-name>contextConfigLocation</param-name>
+	        <param-value>classpath*:config/spring/context-*.xml</param-value>
+	  	</context-param>
+	    <listener>
+	        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	        	---> 이 클래스를 등록해서 spring 설정 파일(/WEB-INF/applicationContext.xml)을 로드한다.
+	        	     위의 applicationContext.xml의 위치는 context-param에서 변경할 수 있다.
+	    </listener>
+	* ContextLoaderListener가 (위에서 등록한 리스너) contextConfigLocation(context-param에서 설정함)의
+	  설정 정보 파일에 따라 root context를 생성한다.
+	  디폴트는 /WEB-INF/applicationContext.xml을 사용한다.
+
+- classpath: 이게 있으면, 클래스패스에 위치한 설정파일, 없으면 웹 어플리케이션 루트 디렉토리에서 찾는다.
+
+- contextConfigLocation에서 param-value의 경로를 지정하지 않으면 /WEB-INF/applicationContext.xml에서 값을 참조한다.
+
+************************************************************************************************************************
+ContextLoaderListener와 DispatcherServlet은 각각 webapplicationcontext를 생성
+****ContextLoaderListener가 생성한 컨텍스트가 root 컨텍스트가 되고****
+****DispatcherServlet이 생성한 컨텍스트가 자식 컨텍스트가 됨.****
+즉, root 컨텍스트의 설정 빈을 aController-servlet.xmll에서 생성한 빈과
+bController-servlet.xml에서 생성한 빈이 사용할 수 있다.
+************************************************************************************************************************
+
+- <filter> : 한글 깨짐 문제를 CharacterEncoding을 사용해 Encoding 처리한다.
+	ex)
+		<filter>
+	        <filter-name>encodingFilter</filter-name>
+	        <filter-class>
+	            org.springframework.web.filter.CharacterEncodingFilter
+	        </filter-class>
+	        <init-param>
+	            <param-name>encoding</param-name>
+	            <param-value>utf-8</param-value>
+	        </init-param>
+	        만약 여기에 추가로
+	        <init-param>
+	        	<param-name>forceEncoding</param-name>
+	        	<param-value>false</param-value>
+	        </init-param>
+	        가 있다면 HttpServletRequest 객체에 특정 인코딩 값이 들어가 있는 경우
+	        그 값에 맞춰 인코딩을 한다.
+	    </filter>
+	    <filter-mapping>
+	        <filter-name>encodingFilter</filter-name>
+	        <url-pattern>*.do</url-pattern> ---> *.do로 들어오는 모든 req에 해당 필터를 적용한다.
+	    </filter-mapping>
+	    
+- 타이틀 설정
+	web.xml의 Title 및 주석 정도의 역할을 한다. 보통 project 이름으로 기술한다.
+	<display-name>projectname</display-name>
+	<description>my spring test project ~~~~</description>
+
+- 세션 설정
+	값을 0이나 음수로 설정하면 세션은 유효 시간을 가지지 않는다.
+	session.invalidate()를 호출하지 않는 이상 session 객체가 사라지지 않는다.
+	<session-config>
+		<session-timeout>30</session-timeout> ---> 분 단위
+	</session-config>
+	+ 톰캣 내에서 Session Timeout을 설정하는 우선순위가 존재한다.
+	  1. session.setMaxInactiveInterval() 프로그램내에서 time out을 설정했을 경우
+	  2. Web application 내의 WEB-INF/web.xml
+	  3. Tomcat 내의 conf/web.xml
+	+ 특정 세션만 타임아웃 설정
+	  session.setMaxInactiveInterval(1800);
+	  sessioni.setMaxInactiveInterval(30*60);
+	  단위는 초
+	+ Web Application을 만들고 세션관리를 적절히 해주지 않고 타임아웃을 무한으로 두면
+	  나중에는 메모리가 풀이 나서 WAS가 죽어버리는 일이 있기 때문에 미연에 방지하기 위해
+	  현재 세션 수가 얼마나 되는지 확인하기 위한 세션을 체크하는 리스너를 등록하는 것도 존재한다.
+	  HttpSessionListener를 상속받아 구현한 클래스를 만든다.
+	  package com.test.java.listener;
+	  import javax.servlet.http.HttpSessionEvent;
+	  import javax.servlet.http.HttpSessionListener;
+	  public class SessionCounterListener implements HttpSessionListener{
+	  	static.private int activeSession;
+	  	public static int getActiveSessions() {
+	  		return activeSessions;
+	  	}
+	  	@Override
+	  	public void sessionCreated(HttpSessionEvent arg(){
+	  		activeSessions++;
+	  		System.out.println("Created!! activeSessions:"+activeSessions);
+	  	}
+	  	@Override
+	  	public void sessionDestroyed(HttpSessionEvent arg(){
+	  		activeSessions--;
+	  		System.out.println("Destroyed!! activeSessions:"+activeSessions);
+	  	}
+	  }
+	  web.xml에 리스너 등록
+	  <listener>
+	  	<listeneer-class>com.test.java.listener.SessionCounterListener</listener-class>
+	  </listener>
+	  또, 세션 종료시간 설정
+	  <session-config>
+	  	<session-timeout>15</session-timeout>
+	
+- 에러 페이지 설정
+	location에는 절대 경로 또는 url 매핑으로 컨트롤러에서 제어가 가능하다.
+	절대경로 : /WEB-INF/jsp/error/error404.jsp등 처럼 직접 jsp 파일 위치를 연결
+	url매핑 : /error처럼 작성하여 컨트롤러에서 modelAndView 객체로 화면을 return한다.
+	<error-page>
+		<error-code>404</error-code>
+		<location>/WEB-INF/jsp/error/error.jsp</location>
+	</error-page>
+	<error-page>
+		<error-code>500</error-code>
+		<location>/WEB-INF/jsp/error/error.jsp</location>
+	</error-page>
+	예외별로 다른 page를 보여주고 싶다면
+	<error-code>java.lang.Throwable</error-code>처럼 자바 예외형식의 클래스명을 입력해줘도 된다.
+	
+- 시작 페이지 설정
+	webapp밑에 index.jsp를 불러오고 싶을 때 ->
+	/ 로 요청 시 지정되어 있는 리소스를 호출한다는 의미이다.
+	controller에 / 로 매핑되어 있는 메소드가 있더라도 web.xml에 지정되어 있는 자원을 우선시한다.
+	최초로 보여주는 페이지를 설정하거나, login 페이지로 설정하는 등으로 활용될 때 사용된다.
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+	
