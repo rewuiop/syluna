@@ -1,0 +1,64 @@
+- action-servlet.xml 설정
+- web.xml에서 
+	<servlet>
+		<servlet-name>action</servlet-name>
+		<servlet-class>
+			org.springframework.web.servlet.DispatcherServlet
+		</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>
+				/WEB-INF/config/*-servlet.xml
+			</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>action</servlet-name>
+		<url-pattern>*.do</url-pattern> ---> 이 요청에 대해 이 디스패쳐 서블릿이 실행된다.
+	</servlet-mapping>
+	와 같이 dispatcher servlet으로 명시해준 경로(/WEB-INF/config)밑에 있는
+	*-servlet.xml로 끝나는 xml 파일 중 하나인 action-servlet.xml파일이다.
+	dispatcher servlet 역할을 한다.
+	.do로 끝나는 모든 요청에 대해 이 서블릿이 사용된다.
+- Dispatcher Servlet의 역할
+	Dispatcher : 분배하다, 배치하다, 보급하다
+	-> Dispatcher Servlet은 서블릿을 배치,분배하는 역할을 담당하고 있다.
+	MVC 구조 중 가장 중간에 위치해
+	웹브라우저에서 요청한 정보를 받아 핸들러매핑에 역할을 분배하고,
+	컨트롤러에서 보내온 정보를 받아, 뷰 리졸버에 전달 후,
+	뷰에서 출력된 화면을 웹에 다시 전송해주는 역할을 한다.
+	web.xml에서 선언된 리스너는 Dispatcher Servlet의 부모(모든 서블릿에 공통 적용)가 된다.
+	
+	
+	<context:component-scan base-package="syluna" use-default-filters="false"> ---> syluna라는 패키지에서 컨트롤러를 찾는다.
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+    
+    <mvc:annotation-driven>
+        <mvc:argument-resolvers>
+            <bean class="syluna.common.resolver.CustomMapArgumentResolver"></bean>      
+        </mvc:argument-resolvers>
+    </mvc:annotation-driven>
+    
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean id="loggerInterceptor" class="syluna.common.logger.LoggerInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+    
+    <aop:aspectj-autoproxy/>
+    <bean id="loggerAspect" class="syluna.common.logger.LoggerAspect" />
+     
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+     
+    <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="0" />
+    <bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />    
+     
+    <bean
+        class="org.springframework.web.servlet.view.UrlBasedViewResolver" p:order="1" ---> ViewResolver
+        p:viewClass="org.springframework.web.servlet.view.JstlView"
+        p:prefix="/WEB-INF/jsp/" p:suffix=".jsp"> ---> prefix : 컨트롤러에서 jsp 파일을 찾을 때 기준이 되는 폴더
+        											   suffix : 컨트롤러에서 설정한 뷰 페이지 명 뒤에 붙여준다.
+    </bean>
