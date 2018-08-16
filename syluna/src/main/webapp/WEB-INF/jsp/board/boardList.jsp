@@ -21,8 +21,8 @@
                 <th scope="col">작성일</th>
             </tr>
         </thead>
-        <tbody>
-            <c:choose>
+        <tbody id="tbody">
+            <%-- <c:choose>
                 <c:when test="${fn:length(list) > 0}">
                     <c:forEach items="${list }" var="row">
                         <tr>
@@ -41,7 +41,7 @@
                         <td colspan="4">조회된 결과가 없습니다.</td>
                     </tr>
                 </c:otherwise>
-            </c:choose>
+            </c:choose> --%>
         </tbody>
     </table>
     <br/>
@@ -51,7 +51,7 @@
     <%@ include file="/WEB-INF/include/include-body.jsp" %>
     <script type="text/javascript">
         $(document).ready(function(){
-            /* window.onload=function() {fn_pageSelect(1);}; */
+            window.onload=function() {fn_pageSelect(2);};
             $("#write").on("click", function(e){ //글쓰기 버튼
                 e.preventDefault();
                 fn_openBoardWrite();
@@ -62,8 +62,7 @@
                 fn_openBoardDetail($(this));
             });
         });
-         
-         
+        
         function fn_openBoardWrite(){
             var comSubmit = new ComSubmit();
             comSubmit.setUrl("<c:url value='/board/openBoardWrite.do' />");
@@ -77,15 +76,32 @@
             comSubmit.submit();
         }
         
-        /* function fn_pageSelect(pageNo) {
-            var comSubmit = new ComSubmit();
-            comSubmit.setUrl("<c:url value='board/openBoardList.do'/>");
-            comSubmit.addParam("START", 20);
-            comSubmit.addParam("ROWPERPAGE", 20);
-            comSubmit.submit;
+        function fn_pageSelect(pageNo) {
+            $.ajax({
+                type: "POST",
+                url : "<c:url value='board/selectBoardList.do'/>", 
+                data : {
+                    'pageNo' : pageNo
+                },
+                async : false,
+                success : function (data, status) {
+                    alert("success!");
+                    var str="";
+                    var total = data.TOTAL_COUNT;
+                    var body = $("#tbody");
+                    body.empty();
+                    if(total == 0){
+                        var str="<tr>" + "<td colspan='4'>조회 결과가 없음</td>" + "</tr>";
+                        body.append(str);
+                    }else{
+                        alert("정보있음");
+                    }
+                    body.append(str);
+                }
+            });
         }
         
-        function fn_selectBoardListCallBack(data) {
+        /* function fn_selectBoardListCallBack(data) {
             // rendering 구현
         } */
     </script>

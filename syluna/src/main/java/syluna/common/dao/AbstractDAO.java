@@ -1,6 +1,8 @@
 package syluna.common.dao;
 
 import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -48,8 +50,16 @@ public class AbstractDAO {
 		return this.sqlSession.selectList(queryId);
 	}
 
-	public List selectList(String queryId, Object params) {
-		this.printQueryId(queryId);
-		return this.sqlSession.selectList(queryId, params);
-	}
+	@SuppressWarnings("rawtypes")
+    public List selectList(String queryId, Object params){
+        printQueryId(queryId);
+        return sqlSession.selectList(queryId,params);
+    }
+	
+	@SuppressWarnings("unchecked")
+    public Object selectPagingList(String queryId, Object params) {
+        this.printQueryId(queryId);
+        Map<String, Object> map = (Map<String, Object>)params;
+        return this.sqlSession.selectList(queryId, map);
+    }
 }

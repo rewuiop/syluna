@@ -3,12 +3,21 @@ package syluna.board;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
+
 import syluna.common.dao.AbstractDAO;
 
 @Repository("boardDAO")
 public class BoardDAO extends AbstractDAO {
+    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> selectBoardList(Map<String, Object> map) throws Exception {
-        return this.selectList("board.selectBoardList", map);
+        String strPageNo = (String)map.get("pageNo");
+        int nPageNo = 0;
+        if(StringUtils.isEmpty(strPageNo) == false) {
+            nPageNo = Integer.parseInt(strPageNo);
+        }
+        map.put("START", nPageNo*20);
+        return (List<Map<String,Object>>)selectList("board.selectBoardList", map);
     }
 
     public void insertBoard(Map<String, Object> map) throws Exception {

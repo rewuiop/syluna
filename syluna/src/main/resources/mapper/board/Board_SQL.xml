@@ -24,7 +24,7 @@
                                 WHERE DEL_GB='N'
                                 ORDER BY IDX DESC
                         )A, (SELECT @ROWNUM:=0) B
-                ) C 
+                ) C LIMIT #{START}, 20
         ]]>
      </select>
      

@@ -25,6 +25,20 @@ public class BoardController {
         mv.addObject("list", list);
         return mv;
     }
+    
+    @RequestMapping(value="/board/selectBoardList.do")
+    public ModelAndView selectBoardList(CommandMap commandMap) throws Exception{
+        ModelAndView mv = new ModelAndView("jsonView");
+        List<Map<String, Object>> list = boardService.selectBoardList(commandMap.getMap());
+        mv.addObject("list", list);
+        if(list.size() > 0) {
+            mv.addObject("TOTAL", list.get(0).get("TOTAL_COUNT"));
+        }
+        else {
+            mv.addObject("TOTAL", 0);
+        }
+        return mv;
+    }
 
     @RequestMapping({"/board/testMapArgumentResolver.do"})
     public ModelAndView testMapArgumentResolver(CommandMap commandMap) throws Exception {
