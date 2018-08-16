@@ -46,15 +46,17 @@
     </table>
     <br/>
     <a href="#this" class="btn" id="write">글쓰기</a>
-     
+    <!-- <div id="PAGE_NAVI" style="text-align:center;"></div>
+    <input type="hidden" id="PAGE_INDEX" name="PAGE_INDEX"> -->
     <%@ include file="/WEB-INF/include/include-body.jsp" %>
     <script type="text/javascript">
         $(document).ready(function(){
+            /* window.onload=function() {fn_pageSelect(1);}; */
             $("#write").on("click", function(e){ //글쓰기 버튼
                 e.preventDefault();
                 fn_openBoardWrite();
             });
-             
+            
             $("a[name='title']").on("click", function(e){ //제목
                 e.preventDefault();
                 fn_openBoardDetail($(this));
@@ -74,6 +76,18 @@
             comSubmit.addParam("IDX", obj.parent().find("#IDX").val());
             comSubmit.submit();
         }
+        
+        /* function fn_pageSelect(pageNo) {
+            var comSubmit = new ComSubmit();
+            comSubmit.setUrl("<c:url value='board/openBoardList.do'/>");
+            comSubmit.addParam("START", 20);
+            comSubmit.addParam("ROWPERPAGE", 20);
+            comSubmit.submit;
+        }
+        
+        function fn_selectBoardListCallBack(data) {
+            // rendering 구현
+        } */
     </script>
 </body>
 </html>

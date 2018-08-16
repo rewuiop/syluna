@@ -49,7 +49,11 @@
              
             $("#write").on("click", function(e){ //작성하기 버튼
                 e.preventDefault();
-                fn_insertBoard();
+            	if($("#CONTENTS").val().length<=4000){
+            	    fn_insertBoard();
+            	}else{
+            	    alert("글자 수가 4000자를 넘는 " + $("#CONTENTS").val().length + "자입니다.");
+            	};
             });
              
             $("#addFile").on("click", function(e){ //파일 추가 버튼
