@@ -31,7 +31,7 @@
                 <td colspan="3">${map.TITLE }</td>
             </tr>
             <tr>
-                <td colspan="4">${map.CONTENTS }</td>
+                <td colspan="4" style="white-space:pre-wrap;">${map.CONTENTS }</td>
             </tr>
             <tr>
                 <th scope="row">첨부파일</th>

@@ -81,7 +81,7 @@
                 type: "POST",
                 url : "<c:url value='board/selectBoardList.do'/>", 
                 data : {
-                    'pageNo' : pageNo
+                    "pageNo" : pageNo
                 },
                 async : false,
                 success : function (data, status) {
