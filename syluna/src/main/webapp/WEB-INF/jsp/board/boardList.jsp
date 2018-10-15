@@ -22,7 +22,7 @@
             </tr>
         </thead>
         <tbody id="tbody">
-            <%-- <c:choose>
+            <c:choose>
                 <c:when test="${fn:length(list) > 0}">
                     <c:forEach items="${list }" var="row">
                         <tr>
@@ -41,7 +41,7 @@
                         <td colspan="4">조회된 결과가 없습니다.</td>
                     </tr>
                 </c:otherwise>
-            </c:choose> --%>
+            </c:choose>
         </tbody>
     </table>
     <br/>
